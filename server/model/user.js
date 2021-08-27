@@ -1,21 +1,32 @@
-const { createHmac } = await import("crypto");
-const mongoose = require("mongoose");
+var mongoose = require("mongoose");
+const crypto = require("crypto");
 const { v4: uuidv4 } = require("uuid");
 
-const userSchema = new mongoose.Schema(
+var userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
       required: true,
       maxlength: 32,
+      trim: true,
+    },
+    lastname: {
+      type: String,
+      maxlength: 32,
+      trim: true,
     },
     email: {
       type: String,
+      trim: true,
       required: true,
       unique: true,
     },
+    userinfo: {
+      type: String,
+      trim: true,
+    },
     encry_password: {
-      type: Number,
+      type: String,
       required: true,
     },
     salt: String,
@@ -23,18 +34,9 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    purchase: {
+    purchases: {
       type: Array,
       default: [],
-    },
-    address: {
-      street: {
-        type: String,
-        required: true,
-      },
-      city: { type: String, required: true },
-      state: { type: String, required: true },
-      zip: { type: Number, required: true },
     },
   },
   { timestamps: true },
@@ -48,14 +50,19 @@ userSchema
     this.encry_password = this.securePassword(password);
   })
   .get(function () {
-    return _password;
+    return this._password;
   });
 
-userSchema.method = {
+userSchema.methods = {
+  autheticate: function (plainpassword) {
+    return this.securePassword(plainpassword) === this.encry_password;
+  },
+
   securePassword: function (plainpassword) {
     if (!plainpassword) return "";
     try {
-      return createHmac("sha256", this.salt)
+      return crypto
+        .createHmac("sha256", this.salt)
         .update(plainpassword)
         .digest("hex");
     } catch (err) {
@@ -64,5 +71,4 @@ userSchema.method = {
   },
 };
 
-const User = mongoose.model("User", userSchema);
-module.exports = User;
+module.exports = mongoose.model("User", userSchema);
