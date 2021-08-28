@@ -6,6 +6,8 @@ const port = process.env.PORT;
 const cookieParser = require("cookie-parser");
 const authRoutes = require("./route/auth");
 const userRoutes = require("./route/user");
+const productRoutes = require("./route/product");
+const orderRoutes = require("./route/order");
 const cors = require("cors");
 
 // rest object
@@ -20,6 +22,8 @@ app.use(cookieParser());
 // myRoutes
 app.use("/api", authRoutes);
 app.use("/api", userRoutes);
+app.use("/api", productRoutes);
+// app.use("/api", orderRoutes);
 
 // connection
 const DB = process.env.DATABASE;
